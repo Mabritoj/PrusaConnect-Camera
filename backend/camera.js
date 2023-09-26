@@ -1,30 +1,34 @@
 const https = require('https');
 const fs = require('fs');
 
-exports.uploadSnapshot = function(uuid, token, fingerprint, snapshot) {
+exports.uploadSnapshotTest = function(token, fingerprint) {
     return new Promise(function(resolve, reject)
     {
-
         const file = fs.readFileSync('./public/snickers.jpg')
-        const base64String = Buffer.from(file).toString('base64');
 
         var chunks = "";
 
         var postRequest = {
             host: "connect.prusa3d.com",
-            path: '/c/snapshot?printer_uuid=' + uuid,
+            path: '/c/snapshot',
             port: 443,
             method: "PUT",
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'image/jpeg',
                 'Token': token,
-                'Fingerprint': fingerprint
-            },
-            json: true
+                'Fingerprint': fingerprint,
+                'Content-Length': Buffer.byteLength(file)
+            }
         };
 
         var req = https.request(postRequest, function(res) {
             res.setEncoding('utf8');
+            var error = false;
+            
+            if(res.statusCode != 204)
+            {
+                error = true;
+            }
 
             res.on('data', function(data) {
                 chunks += data.toString();
@@ -41,7 +45,14 @@ exports.uploadSnapshot = function(uuid, token, fingerprint, snapshot) {
                 }
 
                 console.log(response);
-                resolve(response);  
+                if(error == false)
+                {
+                    resolve(response);  
+                }
+                else
+                {
+                    reject(response);
+                }
             });
         });
 
@@ -51,7 +62,7 @@ exports.uploadSnapshot = function(uuid, token, fingerprint, snapshot) {
         });
 
         // write data to request body
-        req.write(base64String);
+        req.write(file);
         req.end();
     });
 }

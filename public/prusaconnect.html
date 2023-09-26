@@ -88,7 +88,6 @@
                     },
                     error: function(error){
                         console.log(error);
-                        alert(error);
                     }
                 });
             }
@@ -98,7 +97,7 @@
                 {
                     $.ajax({
                         type: "GET",
-                        url: "/api/register",
+                        url: "/api/printers",
                         contentType:"application/json",
                         dataType:"json",
                         success: function(data){
